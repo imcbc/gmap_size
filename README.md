@@ -16,7 +16,8 @@ For the case STM32:
 python gmap_size.py -i {.map file} -t .isr_vector,.text,.init -d .rodata,.data,.ARM,.ARM.exidx,.init_array,.fini_array -b .bss,._user_heap_stack
 
 The output could be:
-
+```
+<code>
 ========== Section Size ==========
 Total Text = 79692   (Dec)  0x1374c  (Hex)
 Total Data = 10988   (Dec)  0x2aec   (Hex)
@@ -73,3 +74,4 @@ Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.o :
 
 ...
 ...
+</code>
