@@ -11,11 +11,11 @@ and parser the given section names and counting the size in:
 
 Normally the usage would be 
 
-python gmap_size.py -i {.map file} -t .text,.vectors -d .rodata,.data -b .bss,.stack,.heap
+python gmap_size.py -i {.map file} -t .text,.vectors -d .rodata,.data -b .bss,.stack,.heap --detail
 
 For the case STM32:
 
-python gmap_size.py -i {.map file} -t .isr_vector,.text,.init -d .rodata,.data,.ARM,.ARM.exidx,.init_array,.fini_array -b .bss,._user_heap_stack
+python gmap_size.py -i {.map file} -t .isr_vector,.text,.init -d .rodata,.data,.ARM,.ARM.exidx,.init_array,.fini_array -b .bss,._user_heap_stack --detail
 """
 
 import sys
@@ -31,15 +31,16 @@ def print_db(db):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-i',     type=str,              help = 'Input map file')
-parser.add_argument('-v',     action='store_true',   help = 'Verbose mode', default=False)
-parser.add_argument('-t',     dest='text', type=str, default = '', help = 'Text sections list, seperate with ,')
-parser.add_argument('--text', dest='text', type=str, default = '', help = 'Same as -t')
-parser.add_argument('-d',     dest='data', type=str, default = '', help = 'Data sections list, seperate with ,')
-parser.add_argument('--data', dest='data', type=str, default = '', help = 'Same as -d')
-parser.add_argument('-b',     dest='bss',  type=str, default = '', help = 'Bss sections list, seperate with ,')
-parser.add_argument('--bss',  dest='bss',  type=str, default = '', help = 'Same as -b')
-parser.add_argument('--ignore', type=str,            default = '', help = 'Ignore sections list, sperate with ,')
+parser.add_argument('-i',     type=str,                                 help = 'Input map file')
+parser.add_argument('-v',     action='store_true',   default = False,   help = 'Verbose mode')
+parser.add_argument('-t',     dest='text', type=str, default = '',      help = 'Text sections list, seperate with comma')
+parser.add_argument('--text', dest='text', type=str, default = '',      help = 'Same as -t')
+parser.add_argument('-d',     dest='data', type=str, default = '',      help = 'Data sections list, seperate with comma')
+parser.add_argument('--data', dest='data', type=str, default = '',      help = 'Same as -d')
+parser.add_argument('-b',     dest='bss',  type=str, default = '',      help = 'Bss sections list, seperate with comma')
+parser.add_argument('--bss',  dest='bss',  type=str, default = '',      help = 'Same as -b')
+parser.add_argument('--ignore', type=str,            default = '',      help = 'Ignore sections list, sperate with comma')
+parser.add_argument('--detail', action='store_true', default = False,   help = 'Report symbol usage in detail')
 
 args = parser.parse_args()
 
@@ -221,12 +222,14 @@ for l in sec_db2:
     if addr == (laddr + lsize):
         pass
     elif addr > (laddr + lsize):
+        gap = addr - (laddr + lsize)
         if gap >= ignore_gap_size:
             pass
         else:
             print("!!!Gap")
-            print(sec_db2[idx - 1])
-            print(l)
+            print(hex(addr),">",hex(laddr+lsize))
+            print("Last line:", sec_db2[idx-1])
+            print("Current Line:",l)
     elif addr < (laddr + lsize):
         print("!!!!Overlap")
     lsect, laddr, lsize, lfname = l
@@ -383,13 +386,14 @@ print('--------------------------------------')
 out_str = "{:<10}{:<10}{:<10}{}{:.1f} KB".format(total_text, total_data, total_bss, 'Total = ', (total_text + total_data + total_bss)/1024)
 print(out_str)
 
-print("\r\n\r\n\r\n========== Symbol Size Report ==========")
-#Report eabh object
-for f in obj_all:
-    print(f,":")
-    for l in sec_db3:
-        stype, sect, addr, size, obj = l
-        if obj == f:
-            out_str = "  {:<8}{:<10}{:<50}".format(stype, size, sect)
-            print(out_str)
-    print('\r\n')
+if args.detail == True:
+    print("\r\n\r\n\r\n========== Symbol Size Report ==========")
+    #Report eabh object
+    for f in obj_all:
+        print(f,":")
+        for l in sec_db3:
+            stype, sect, addr, size, obj = l
+            if obj == f:
+                out_str = "  {:<8}{:<10}{:<50}".format(stype, size, sect)
+                print(out_str)
+        print('\r\n')

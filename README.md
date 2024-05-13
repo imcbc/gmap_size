@@ -7,13 +7,34 @@ and parser the given section names and counting the size in:
   - each object file's total text, data, bss
   - each object file's symbol type and size
 
-Normally the usage would be 
+Command option would be:
+```
+gmap_size.py [-h] [-i I] [-v] [-t TEXT] [--text TEXT] [-d DATA] [--data DATA] [-b BSS] [--bss BSS] [--ignore IGNORE] [--symbol]
 
-python gmap_size.py -i {.map file} -t .text,.vectors -d .rodata,.data -b .bss,.stack,.heap
+optional arguments:
+  -h, --help       show this help message and exit
+  -i I             Input map file
+  -v               Verbose mode
+  -t TEXT          Text sections list, seperate with comma
+  --text TEXT      Same as -t
+  -d DATA          Data sections list, seperate with comma
+  --data DATA      Same as -d
+  -b BSS           Bss sections list, seperate with comma
+  --bss BSS        Same as -b
+  --ignore IGNORE  Ignore sections list, sperate with comma
+  --detail         Report symbol usage in detail
+```
+
+Normally the usage would be:
+
+```
+python gmap_size.py -i {.map file} -t .text,.vectors -d .rodata,.data -b .bss,.stack,.heap --detail
+```
 
 For the case STM32:
-
-python gmap_size.py -i {.map file} -t .isr_vector,.text,.init -d .rodata,.data,.ARM,.ARM.exidx,.init_array,.fini_array -b .bss,._user_heap_stack
+```
+python gmap_size.py -i {.map file} -t .isr_vector,.text,.init -d .rodata,.data,.ARM,.ARM.exidx,.init_array,.fini_array -b .bss,._user_heap_stack --detail
+```
 
 The output could be:
 ```
